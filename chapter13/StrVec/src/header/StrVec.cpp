@@ -60,3 +60,24 @@ void StrVec::reallocate()
 	first_free = dest;
 	cap = elements + newcapacity;
 }
+
+StrVec::StrVec(StrVec &&s)noexcept // 移动操作不应抛出任何异常
+// 成员初始化器接管s中的资源
+	: elements(s.elements), first_free(s.first_free), cap(s.cap)
+{
+	// 令s进入这样的状态——对其运行析构函数是安全的
+	s.elements = s.first_free = s.cap = nullptr;
+}
+
+StrVec &StrVec::operator=(StrVec &&rhs)noexcept
+{
+	if (this != &rhs)
+	{
+		free();
+		elements = rhs.elements;
+		first_free = rhs.first_free;
+		cap = rhs.cap;
+		rhs.elements = rhs.first_free = rhs.cap = nullptr;
+	}
+	return *this;
+}

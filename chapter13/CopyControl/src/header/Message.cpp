@@ -58,3 +58,30 @@ void swap(Message &lhs, Message &rhs)
 	for (auto f : rhs.folders)
 		f->addMsg(rhs);
 }
+
+void Message::move_folders(Message &m)
+{
+	folders = std::move(m.folders);
+	for (auto f:folders)
+	{
+		f->remMsg(m);
+		f->addMsg(*this);
+	}
+	m.folders.clear(); // 确保销毁m是无害的
+}
+
+Message::Message(Message &&m):contents(std::move(m.contents))
+{
+	move_folders(m); // 移动folders并更新Folder指针
+}
+
+Message &Message::operator=(Message &&rhs)
+{
+	if (this != &rhs)
+	{
+		remove_from_Folders();
+		contents = std::move(rhs.contents);
+		move_folders(rhs);
+	}
+	return *this;
+}
